@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Debris Collision Prediction</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        body {
+            background: #f4f7fb;
+            color: #172033;
+        }
+        /* ---------------- HEADER ---------------- */
+        header {
+            background: #111827;
+            color: white;
+            padding: 25px 45px;
+        }
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        header p {
+            color: #cbd5e1;
+            font-size: 15px;
+        }
+        /* ---------------- MAIN ---------------- */
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 25px;
+        }
+        /* ---------------- CARDS ---------------- */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+        .card h3 {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 12px;
+        }
+        .number {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        /* ---------------- PANELS ---------------- */
+        .panel {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+        }
+        .panel h2 {
+            margin-bottom: 20px;
+            font-size: 21px;
+        }
+        /* ---------------- FORM ---------------- */
+        .form-row {
+            display: flex;
+            gap: 20px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 220px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 7px;
+        }
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 7px;
+            background: white;
+            font-size: 14px;
+        }
+        button {
+            padding: 12px 22px;
+            background: #111827;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #374151;
+        }
+        /* ---------------- RESULT ---------------- */
+        #result {
+            display: none;
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+        .result-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .result-item {
+            margin: 8px 0;
+        }
+        /* ---------------- TABLE ---------------- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background: #f1f5f9;
+            padding: 13px;
+            text-align: left;
+            font-size: 14px;
+        }
+        td {
+            padding: 13px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+        /* ---------------- RISK ---------------- */
+        .HIGH {
+            color: #b42318;
+            font-weight: bold;
+        }
+        .MEDIUM {
+            color: #b54708;
+            font-weight: bold;
+        }
+        .LOW {
+            color: #027a48;
+            font-weight: bold;
+        }
+        /* ---------------- STATUS ---------------- */
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .active {
+            background: #dcfce7;
+            color: #166534;
+        }
+        /* ---------------- FOOTER ---------------- */
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #64748b;
+            font-size: 13px;
+        }
+        /* ---------------- RESPONSIVE ---------------- */
+        @media (max-width: 900px) {
+
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+        }
+        @media (max-width: 600px) {
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                padding: 20px;
+            }
+
+            .container {
+                padding: 0 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- ================= HEADER ================= -->
+<header>
+    <h1>
+        Space Debris Collision Prediction
+    </h1>
+    <p>
+        Orbital Asset Management &amp; Risk Monitoring System
+    </p>
+</header>
+<!-- ================= MAIN ================= -->
+<div class="container">
+    <!-- ================= DASHBOARD CARDS ================= -->
+    <div class="cards">
+        <div class="card">
+            <h3>
+                ACTIVE SATELLITES
+            </h3>
+            <div
+                class="number"
+                id="satelliteCount">
+                -
+            </div>
+        </div>
+        <div class="card">
+            <h3>
+                TRACKED DEBRIS
+            </h3>
+            <div
+                class="number"
+                id="debrisCount">
+                -
+            </div>
+        </div>
+        
+        <div class="card">
+
+            <h3>
+                COLLISION ALERTS
+            </h3>
+
+            <div
+                class="number"
+                id="alertCount">
+                -
+            </div>
+
+        </div>
+
+
+
+        <div class="card">
+
+            <h3>
+                HIGH-RISK ALERTS
+            </h3>
+
+            <div
+                class="number"
+                id="highRiskCount">
+                -
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- ================= COLLISION PREDICTION ================= -->
+
+    <div class="panel">
+
+        <h2>
+            Collision Risk Assessment
+        </h2>
+
+
+        <div class="form-row">
+
+
+            <div class="form-group">
+
+                <label for="satelliteSelect">
+                    Select Satellite
+                </label>
+
+                <select id="satelliteSelect">
+
+                    <option value="">
+                        Loading satellites...
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <div class="form-group">
+
+                <label for="debrisSelect">
+                    Select Debris
+                </label>
+
+                <select id="debrisSelect">
+
+                    <option value="">
+                        Loading debris...
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <button onclick="checkCollision()">
+
+                CHECK COLLISION RISK
+
+            </button>
+
+
+        </div>
+
+
+
+        <!-- RESULT -->
+
+        <div id="result">
+
+            <div class="result-title">
+                Prediction Result
+            </div>
+
+            <div
+                class="result-item"
+                id="resultSatellite">
+            </div>
+
+            <div
+                class="result-item"
+                id="resultDebris">
+            </div>
+
+            <div
+                class="result-item"
+                id="resultDistance">
+            </div>
+
+            <div
+                class="result-item"
+                id="resultProbability">
+            </div>
+
+            <div
+                class="result-item"
+                id="resultRisk">
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- ================= COLLISION ALERT TABLE ================= -->
+
+    <div class="panel">
+
+        <h2>
+            Recent Collision Alerts
+        </h2>
+
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Satellite
+                    </th>
+
+                    <th>
+                        Debris
+                    </th>
+
+                    <th>
+                        Minimum Distance
+                    </th>
+
+                    <th>
+                        Probability
+                    </th>
+
+                    <th>
+                        Risk Level
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="alertTable">
+
+                <tr>
+
+                    <td colspan="5">
+                        Loading alerts...
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+
+    </div>
+
+
+
+    <!-- ================= SATELLITE TABLE ================= -->
+
+    <div class="panel">
+
+        <h2>
+            Satellite Database
+        </h2>
+
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        NORAD ID
+                    </th>
+
+                    <th>
+                        Satellite Name
+                    </th>
+
+                    <th>
+                        Operator
+                    </th>
+
+                    <th>
+                        Orbit Type
+                    </th>
+
+                    <th>
+                        Status
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="satelliteTable">
+
+                <tr>
+
+                    <td colspan="5">
+                        Loading satellites...
+                    </td>
+
+                </tr>
+
+            </tbody>
+
+        </table>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer>
+
+    Space Debris Collision Prediction &amp;
+    Orbital Asset Management System
+
+    <br>
+
+    DBMS Review 1 Prototype
+
+</footer>
+
+
+
+<!-- ================= JAVASCRIPT ================= -->
+
+<script>
+
+
+/*
+    Flask backend address
+*/
+
+const API = "http://127.0.0.1:5000/api";
+
+
+
+/*
+    Generic GET request
+*/
+
+async function getData(endpoint) {
+
+    const response =
+        await fetch(API + endpoint);
+
+    return await response.json();
+
+}
+
+
+
+/*
+    Load dashboard statistics
+*/
+
+async function loadStatistics() {
+
+    try {
+
+        const data =
+            await getData("/stats");
+
+
+        document.getElementById(
+            "satelliteCount"
+        ).innerText = data.satellites;
+
+
+        document.getElementById(
+            "debrisCount"
+        ).innerText = data.debris;
+
+
+        document.getElementById(
+            "alertCount"
+        ).innerText = data.alerts;
+
+
+        document.getElementById(
+            "highRiskCount"
+        ).innerText = data.high_risk;
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Could not load statistics:",
+            error
+        );
+
+    }
+
+}
+
+
+
+/*
+    Load satellites
+*/
+
+async function loadSatellites() {
+
+    try {
+
+        const data =
+            await getData("/satellites");
+
+
+        const select =
+            document.getElementById(
+                "satelliteSelect"
+            );
+
+
+        const table =
+            document.getElementById(
+                "satelliteTable"
+            );
+
+
+        /*
+            Dropdown
+        */
+
+        select.innerHTML =
+            '<option value="">Select satellite</option>';
+
+
+        data.forEach(function (satellite) {
+
+            select.innerHTML += `
+
+                <option value="${satellite.satellite_id}">
+
+                    ${satellite.name}
+
+                </option>
+
+            `;
+
+        });
+
+
+        /*
+            Table
+        */
+
+        table.innerHTML = "";
+
+
+        data.forEach(function (satellite) {
+
+            table.innerHTML += `
+
+                <tr>
+
+                    <td>
+                        ${satellite.norad_id}
+                    </td>
+
+                    <td>
+                        ${satellite.name}
+                    </td>
+
+                    <td>
+                        ${satellite.operator_name}
+                    </td>
+
+                    <td>
+                        ${satellite.orbit_type}
+                    </td>
+
+                    <td>
+
+                        <span class="status active">
+
+                            ${satellite.status}
+
+                        </span>
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        });
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Could not load satellites:",
+            error
+        );
+
+    }
+
+}
+
+
+
+/*
+    Load debris
+*/
+
+async function loadDebris() {
+
+    try {
+
+        const data =
+            await getData("/debris");
+
+
+        const select =
+            document.getElementById(
+                "debrisSelect"
+            );
+
+
+        select.innerHTML =
+            '<option value="">Select debris</option>';
+
+
+        data.forEach(function (item) {
+
+            select.innerHTML += `
+
+                <option value="${item.debris_id}">
+
+                    ${item.name}
+
+                </option>
+
+            `;
+
+        });
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Could not load debris:",
+            error
+        );
+
+    }
+
+}
+
+
+
+/*
+    Load collision alerts
+*/
+
+async function loadAlerts() {
+
+    try {
+
+        const data =
+            await getData("/alerts");
+
+
+        const table =
+            document.getElementById(
+                "alertTable"
+            );
+
+
+        table.innerHTML = "";
+
+
+        if (data.length === 0) {
+
+            table.innerHTML = `
+
+                <tr>
+
+                    <td colspan="5">
+
+                        No collision alerts available.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+        data.forEach(function (alert) {
+
+            const probability =
+                (
+                    alert.collision_probability * 100
+                ).toFixed(1);
+
+
+            table.innerHTML += `
+
+                <tr>
+
+                    <td>
+                        ${alert.satellite}
+                    </td>
+
+                    <td>
+                        ${alert.debris}
+                    </td>
+
+                    <td>
+                        ${alert.minimum_distance_km} km
+                    </td>
+
+                    <td>
+                        ${probability}%
+                    </td>
+
+                    <td
+                        class="${alert.risk_level}"
+                    >
+
+                        ${alert.risk_level}
+
+                    </td>
+
+                </tr>
+
+            `;
+
+        });
+
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Could not load alerts:",
+            error
+        );
+
+    }
+
+}
+
+
+
+/*
+    Run collision-risk assessment
+*/
+
+async function checkCollision() {
+
+
+    const satellite =
+        document.getElementById(
+            "satelliteSelect"
+        ).value;
+
+
+    const debris =
+        document.getElementById(
+            "debrisSelect"
+        ).value;
+
+
+    /*
+        Make sure both objects are selected
+    */
+
+    if (!satellite || !debris) {
+
+        alert(
+            "Please select both a satellite and a debris object."
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+
+        const response =
+            await fetch(
+                API + "/predict",
+                {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        satellite_id:
+                            satellite,
+
+                        debris_id:
+                            debris
+
+                    })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        /*
+            Handle error
+        */
+
+        if (!response.ok) {
+
+            alert(
+                data.error ||
+                "Prediction failed."
+            );
+
+            return;
+
+        }
+
+
+        /*
+            Show result
+        */
+
+        document.getElementById(
+            "result"
+        ).style.display = "block";
+
+
+        document.getElementById(
+            "resultSatellite"
+        ).innerHTML =
+
+            "<strong>Satellite:</strong> " +
+            data.satellite;
+
+
+        document.getElementById(
+            "resultDebris"
+        ).innerHTML =
+
+            "<strong>Debris:</strong> " +
+            data.debris;
+
+
+        document.getElementById(
+            "resultDistance"
+        ).innerHTML =
+
+            "<strong>Minimum Distance:</strong> " +
+            data.minimum_distance_km +
+            " km";
+
+
+        document.getElementById(
+            "resultProbability"
+        ).innerHTML =
+
+            "<strong>Collision-Risk Score:</strong> " +
+            (
+                data.collision_probability * 100
+            ).toFixed(1) +
+            "%";
+
+
+        document.getElementById(
+            "resultRisk"
+        ).innerHTML =
+
+            "<strong>Risk Level:</strong> " +
+
+            `<span class="${data.risk_level}">
+
+                ${data.risk_level}
+
+            </span>`;
+
+
+        /*
+            Reload statistics and alerts
+            because a new alert was stored
+        */
+
+        await loadStatistics();
+
+        await loadAlerts();
+
+
+    }
+
+    catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Could not connect to the backend."
+        );
+
+    }
+
+}
+
+
+
+/*
+    Start application
+*/
+
+async function initializeDashboard() {
+
+    await loadStatistics();
+
+    await loadSatellites();
+
+    await loadDebris();
+
+    await loadAlerts();
+
+}
+
+
+initializeDashboard();
+
+
+</script>
+
+
+</body>
+
+</html>

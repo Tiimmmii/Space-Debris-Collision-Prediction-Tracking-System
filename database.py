@@ -1,0 +1,9 @@
+import mysql.connector
+DB_CONFIG = {
+    "host": "localhost",
+    "user": "root",
+    "password": "SourCandy@95",
+    "database": "space_debris_db"
+}
+def get_connection():
+    return mysql.connector.connect(**DB_CONFIG)
